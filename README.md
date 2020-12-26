@@ -1,6 +1,14 @@
-# Bat-Alert
+<h1 align="center">
+  batalert
+</h1>
+<h4 align="center">
 
-An application to send [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) notifications when the (Linux) host's battery runs low.
+Send [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) notifications when the (Linux) host's battery runs low.
+
+[![License][license-badge]][license-url]
+
+</h4>
+
 
 ## Prerequisites
 
@@ -31,6 +39,13 @@ You can run `batalert` with default setting to send the first notification when 
   batalert --uevent /sys/class/power_supply/BAT2/uevent
   ```
 
+## Building
+
+Build the app via `Cargo`:
+```
+cargo build --release
+```
 
 
-
+[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-url]: https://github.com/0ortmann/batalert/blob/master/LICENSE

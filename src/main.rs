@@ -7,7 +7,7 @@ use std::time::Duration;
 fn main() {
     // parse CLI options
     let matches = App::new("batalert")
-        .version("0.1.0")
+        .version("0.2.0")
         .author("Felix Ortmann <flx.ortmann@gmail.com>")
         .about("Sends D-Bus notification when battery runs low.")
         .arg(

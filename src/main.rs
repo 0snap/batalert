@@ -18,11 +18,11 @@ fn main() {
                 .help("Read the battery capacity from this uevent file."),
         )
         .arg(
-            Arg::with_name("threshold")
-                .short("t")
-                .long("threshold")
+            Arg::with_name("alert")
+                .short("a")
+                .long("alert")
                 .default_value("15")
-                .help("Send the first notification when battery falls below this"),
+                .help("Send the first notification when battery falls below this threshold"),
         )
         .arg(
             Arg::with_name("notification-step")
@@ -30,6 +30,13 @@ fn main() {
                 .long("notification-step")
                 .default_value("3")
                 .help("Repeat notifications for every n percent the battery discharges"),
+        )
+        .arg(
+            Arg::with_name("timeout")
+                .short("t")
+                .long("timeout")
+                .default_value("15")
+                .help("Hide the notification after t seconds"),
         )
         .arg(
             Arg::with_name("icon")
@@ -41,24 +48,35 @@ fn main() {
         .get_matches();
     let uevt_file = matches.value_of("uevent").unwrap();
     let icon = matches.value_of("icon").unwrap();
-    let threshold = matches
-        .value_of("threshold")
-        .unwrap()
-        .parse::<i8>()
-        .unwrap();
+    let threshold = matches.value_of("alert").unwrap().parse::<i8>().unwrap();
     let step = matches
         .value_of("notification-step")
         .unwrap()
         .parse::<i8>()
         .unwrap();
+    let timeout = matches.value_of("timeout").unwrap().parse::<i32>().unwrap();
 
     // periodic task to compare battery level with configuration
-    watch(&uevt_file, threshold, step, icon);
+    let notify = |cap| send_notification(cap, icon, timeout * 1000);
+    watch(&uevt_file, threshold, step, notify);
 }
 
-// Checks the current battery percentage, alerts the user if the battery
-// discharges and is below the configured threshold
-fn watch(uevt_file: &str, threshold: i8, step: i8, icon: &str) {
+// Puts a notification to the D-Bus
+fn send_notification(cap: i8, icon: &str, timeout: i32) {
+    Notification::new()
+        .summary(&format!("Battery {}%", cap))
+        .body("Charge your battery soon to avoid shutdown")
+        .icon(icon)
+        .urgency(Urgency::Critical)
+        .timeout(timeout)
+        .show()
+        .unwrap();
+}
+
+// Checks the current battery percentage. Calls the notification function
+// periodically in the configured `step` interval if the battery discharges and
+// is below the configured threshold
+fn watch<F: Fn(i8)>(uevt_file: &str, threshold: i8, step: i8, notify: F) {
     let ticker = tick(Duration::from_millis(5000));
     let mut alert_threshold = threshold;
     loop {
@@ -66,13 +84,7 @@ fn watch(uevt_file: &str, threshold: i8, step: i8, icon: &str) {
             recv(ticker) -> _ => {
                 let (cap, status) = extract_status(&uevt_file);
                 if status.to_lowercase() == "discharging" && cap <= alert_threshold {
-                    Notification::new()
-                        .summary(&format!("Battery {}%", cap))
-                        .body("Charge your battery soon to avoid shutdown")
-                        .icon(icon)
-                        .urgency(Urgency::Critical)
-                        .show()
-                        .unwrap();
+                    notify(cap);
                     alert_threshold = cap - step;
                 }
                 else if status.to_lowercase() == "charging" {

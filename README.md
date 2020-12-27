@@ -18,7 +18,7 @@ Send [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) notifications when
 
 ## Usage
 
-You can run `batalert` with default setting to send the first notification when the battery falls below 15% and repeat the notification every 3%. `batalert` resets when you plug-in your charger.
+You can run `batalert` with default setting to send the first notification when the battery falls below 15% and repeat the notification every 3%. Notifications timeout after 15 seconds. `batalert` resets when you plug-in your charger.
 
 ### Customization
 
@@ -28,7 +28,11 @@ You can run `batalert` with default setting to send the first notification when 
   ```
 - Show a notification when the battery falls below 20%, repeat notification every 4% on 16%, 12%, 8% ... :
   ```
-  batalert --threshold 20 --notification-step 4
+  batalert --alert 20 --notification-step 4
+  ```
+- Timeout notifications after a minute:
+  ```
+  batalert --timeout 60
   ```
 - Use a custom icon:
   ```

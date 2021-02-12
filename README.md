@@ -38,9 +38,13 @@ You can run `batalert` with default setting to send the first notification when 
   ```
   batalert --icon /usr/share/icons/<your-icon>.png
   ```
-- Monitor a certain battery, e.g., `BAT2`:
+- Monitor a particular battery, e.g., `BAT2`:
   ```
   batalert --uevent /sys/class/power_supply/BAT2/uevent
+  ```
+- Monitor multiple batteries (repeat the `--uevent` option):
+  ```
+  batalert --uevent /sys/class/power_supply/BAT0/uevent --uevent /path/to/bat1 -u /path/to/bat2
   ```
 
 ## Building

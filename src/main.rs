@@ -1,8 +1,8 @@
 use clap::{App, Arg};
 use crossbeam_channel::{select, tick};
 use notify_rust::{Notification, Urgency};
-use std::{fs, path, process};
 use std::time::Duration;
+use std::{fs, path, process};
 
 #[tokio::main]
 async fn main() {
@@ -82,14 +82,17 @@ async fn main() {
 
 // Puts a notification to the D-Bus
 fn send_notification(bat_name: String, cap: i8, icon: &str, timeout: i32) {
-    Notification::new()
+    match Notification::new()
         .summary(&format!("Battery {} - {}%", bat_name, cap))
         .body("Charge your battery soon to avoid shutdown")
         .icon(icon)
         .urgency(Urgency::Critical)
         .timeout(timeout)
         .show()
-        .unwrap();
+    {
+        Ok(_) => (),
+        Err(err) => println!("Error sending notification: {}", err),
+    };
 }
 
 // Periodically checks the battery status and sends notifications to the user if
